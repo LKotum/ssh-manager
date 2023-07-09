@@ -103,7 +103,7 @@ bool HostsParser::removeHost(int indexHost)
 
 bool HostsParser::_fileExist(std::string path)
 {
-	return bool(std::ifstream(FLAG ? std::filesystem::current_path().string() + SL + path : path));
+	return bool(std::ifstream(path));
 }
 
 std::map<int, std::string> HostsParser::getListHosts()
