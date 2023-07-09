@@ -2,8 +2,6 @@
 
 #ifdef _WIN32
 	#define WINDOWS true
-#elif _WIN64
-	#define WINDOWS true
 #else
 	#define WINDOWS false
 #endif
