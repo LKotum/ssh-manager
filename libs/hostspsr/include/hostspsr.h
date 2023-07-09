@@ -6,18 +6,18 @@
 	#define WINDOWS false
 #endif
 
-#if WINDOWS
-	#define FLAG true
-#else
-	#define FLAG false
-#endif
-
 #include <map>
 #include <string>
 #include <map>
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+
+#if _WIN32
+	#include <stdlib.h>
+#else
+	#include <cstdlib>
+#endif
 
 typedef std::map<int, std::string> Lists;
 
@@ -29,7 +29,15 @@ class HostsParser
 		Lists _listPorts;
 		Lists _listNames;
 		std::fstream _HostsFile;
-		std::string _Path = FLAG ? std::filesystem::current_path().string() + "\\hosts.ini" : "./hosts.ini";
+		#if WINDOWS
+			std::string _hosts_path = "\\.ssh\\hosts.ini"
+			size_t size;
+			char *path;
+			std::string _Path = _dupenv_s(&path, &size, "USERPROFILE") + _hosts_path;
+		#else
+			std::string _hosts_path = "/.ssh/hosts.ini";
+			std::string _Path = getenv("HOME") + _hosts_path;
+		#endif
 		bool _fileExist(std::string);
 		bool _readHosts();
 		void _updateHosts();

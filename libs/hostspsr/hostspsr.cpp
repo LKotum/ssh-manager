@@ -1,17 +1,3 @@
-#ifdef _WIN32
-	#define WINDOWS true
-#else
-	#define WINDOWS false
-#endif
-
-#if WINDOWS
-	#define FLAG true
-	#define SL "\\"
-#else
-	#define FLAG false
-	#define SL "/"
-#endif
-
 #include "include/hostspsr.h"
 #include <fstream>
 #include <sstream>

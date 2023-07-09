@@ -1,6 +1,3 @@
-#ifndef SSHMGR_CPP
-#define SSHMGR_CPP
-
 #include <functional>
 #include <iostream>
 #include <stdexcept>
@@ -21,7 +18,7 @@ const char *logo =
 	"\033[33m| \\____) |\033[32m| \\____) |\033[34m _| |  | |_ \033[0m\n"
 	"\033[33m \\______.'\033[32m \\______.'\033[34m|____||____|\033[0m\n"
 	"\n"
-	"SSH manager (\033[31mv1.0.0\033[0m)\n"
+	"SSH manager (\033[31mv1.1.0\033[0m)\n"
 	"By \033[35mMaxLane\033[0m and \033[35mBadWolf\033[0m\n"
 	"\n"
 	"Feedback:\n"
@@ -101,12 +98,12 @@ string command(string user, string host, string port)
 
 void printList(HostsParser &hosts)
 {
-	cout << "Yor hosts:\n";
+	cout << "\033[33mYour hosts:\033[0m\n";
 	map<int, string> listhosts = hosts.getListHosts();
 
 	for (auto iter2{listhosts.begin()}; iter2 != listhosts.end(); iter2++)
 	{
-		cout << "    [" << iter2->first << "]" << "\t" << iter2->second << std::endl;
+		cout << "[" << iter2->first << "]" << " - \t" << "\033[32m" << iter2->second << "\033[0m" << std::endl;
 	}
 };
 
@@ -120,10 +117,8 @@ void printVer()
 	printLogo();
 };
 
-string request(bool submenu = false){
+string request(){
 	string answer;
-	if (submenu)
-		cout << "	";
 	cout << "\033[34m->\033[0m ";
 	cin >> answer;
 	return answer;
@@ -132,8 +127,6 @@ string request(bool submenu = false){
 void printFlagsHelp()
 {
 	const char *Help=
-	"SSHManager FlagsHelpList v1.0\n"
-	"\n"
 	"\033[33m-h\033[0m,  \033[33m--help\033[0m                                Get this help\n"
 	"\033[33m-v\033[0m,  \033[33m--version\033[0m                             Get information about program\n"
 	"\033[33m-l\033[0m,  \033[33m--list\033[0m                                Get list of hosts\n"
@@ -146,43 +139,41 @@ void printFlagsHelp()
 
 void printHelp(){
 	const char *Help=
-	"SSHManager Help v1.0\n"
-	"\n"
-	"\033[33mh\033[0m, \033[33mhelp\033[0m                              Get this help\n"
-	"\033[33ml\033[0m, \033[33mlist\033[0m                              Get saved hosts templates\n"
-	"\033[33mn\033[0m, \033[33mnew\033[0m                               Used to create new connections\n"
-	"\033[33mc\033[0m, \033[33mconnect\033[0m + \033[35m(argument (digital))\033[0m    Used for connect to host\n"
-	"\033[33mr\033[0m, \033[33mremove\033[0m + \033[35m(argument (digital))\033[0m     Used to remove host preset\n"
-	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m                        Used to terminate the program\n";
+	"\033[33mh\033[0m, \033[33mhelp\033[0m          Get this help\n"
+	"\033[33ml\033[0m, \033[33mlist\033[0m          Get saved hosts templates\n"
+	"\033[33mn\033[0m, \033[33mnew\033[0m           Used to create new connections\n"
+	"\033[33mc\033[0m, \033[33mconnect\033[0m       Used for connect to host\n"
+	"\033[33mr\033[0m, \033[33mremove\033[0m        Used to remove host preset\n"
+	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m    Used to terminate the program\n";
 	cout << Help << endl;
 };
 
 void addHost(HostsParser &hosts, bool connect = false)
 {
-	string ip, port, login;
-	cout << "\033[32m[INFO]\033[0m Write ip/host address\n";
-	ip = request(true);
-	cout << "\033[32m[INFO]\033[0m Write port\n";
-	port = request(true);
-	cout << "\033[32m[INFO]\033[0m Write our login\n";
-	login = request(true);
-	hosts.addHost(login, ip, port);
+	string host, port, user;
+	cout << "\033[32m[INFO]\033[0m Enter your host: ";
+	cin >> host;
+	cout << "\033[32m[INFO]\033[0m Enter your port: ";
+	cin >> port;
+	cout << "\033[32m[INFO]\033[0m Enter your username: ";
+	cin >> user;
+	hosts.addHost(user, host, port);
 	if(connect){
-		system(command(login, ip, port).c_str());
+		system(command(user, host, port).c_str());
 		return;
 	}
-	cout << "\033[32m[INFO]\033[0m Try connect? \033[33m(\033[4my\033[0m\033[33m/n)\033[0m\n";
+	cout << "\033[32m[INFO]\033[0m Try connect to " + host + " \033[33m(\033[4my\033[0m\033[33m/n)\033[0m: ";
 	string answer;
-	answer = request(true);
+	cin >> answer;
 	if (answer == "y"){
-		system(command(login, ip, port).c_str());
+		system(command(user, host, port).c_str());
 
 	}
 	else if (answer == "n"){
 		return;
 	}
 	else {
-		command(login, ip, port);
+		command(user, host, port);
 	}
 };
 
@@ -192,14 +183,13 @@ void removeHost(HostsParser &hosts, int index)
 		cout << "\033[33m[WARN]\033[0m Could not find this host!\n";
 		return;
 	}
-	cout << "\033[32m[INFO]\033[0mAre you sure? \033[33m(yes/no)\033[0m\n";
+	cout << "\033[32m[INFO]\033[0m Are you sure? \033[33m(yes/no)\033[0m: ";
 	string answer;
-	answer = request(true);
+	cin >> answer;
 
 	while((answer != "yes") && (answer != "no")){
-		cout << "\033[31m[WARN]\033[0m Please, write [yes] or [no]\n";
-		answer = request(true);
-		cout << ":" << answer << endl;
+		cout << "\033[31m[WARN]\033[0m Please, write \033[33m[yes]\033[0m or \033[33m[no]\033[0m: ";
+		cin >> answer;
 	}
 
 	if(answer == "yes"){
@@ -305,7 +295,7 @@ int main(int argc, char* argv[])
 	}
 
 	printLogo();
-	cout << "Welcome!\n";
+	cout << "\033[32mWelcome!\033[0m\n";
 	printList(hosts);
 	cout <<"\nType \033[33m[h]\033[0m or \033[33m[help]\033[0m for help...\n";
 	while (args.main){
@@ -317,8 +307,8 @@ int main(int argc, char* argv[])
 				break;
 			case 2:
 				{
-					cout << "\033[32m[INFO]\033[0m Write number of connection\n";
-					answer = request(true);
+					cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
+					cin >> answer;
 					int q;
 					if(check(answer, q)){
 						if (hosts.hostExicst(q)){
@@ -336,8 +326,8 @@ int main(int argc, char* argv[])
 				break;
 			case 4:
 				{
-					cout << "[INFO] Write number of connection\n";
-					answer = request(true);
+					cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
+					cin >> answer;
 					int q;
 					if(check(answer, q))
 						removeHost(hosts, q);
@@ -363,7 +353,3 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-
-// TODO (For roadmap), realize autoreconnect with flags -n-a, -n-c-a, -c-a and in main program
-
-#endif
