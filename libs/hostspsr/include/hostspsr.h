@@ -30,7 +30,7 @@ class HostsParser
 		Lists _listNames;
 		std::fstream _HostsFile;
 		#if WINDOWS
-			std::string _hosts_path = "\\.ssh\\hosts.ini"
+			std::string _hosts_path = "\\.ssh\\hosts.ini";
 			size_t size;
 			char *path;
 			std::string _Path = _dupenv_s(&path, &size, "USERPROFILE") + _hosts_path;
