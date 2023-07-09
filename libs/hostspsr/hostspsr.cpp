@@ -1,3 +1,9 @@
+#ifdef _WIN32
+	#define WINDOWS true
+#else
+	#define WINDOWS false
+#endif
+
 #include "include/hostspsr.h"
 #include <fstream>
 #include <sstream>
@@ -9,10 +15,24 @@
 #include <string>
 #include <map>
 
+#if WINDOWS
+	#include <stdlib.h>
+#else
+	#include <cstdlib>
+#endif
+
 typedef std::map< int, std::string> Lists;
 
 HostsParser::HostsParser()
 {
+	#if WINDOWS
+		size_t size;
+		char* path;
+		_dupenv_s(&path, &size, "USERPROFILE");
+		_Path = path + _hosts_path;
+	#else
+		_Path = getenv("HOME") + _hosts_path;
+	#endif
 	if (_fileExist(_Path))
 	{
 		_HostsFile.open(_Path);

@@ -13,12 +13,6 @@
 #include <iostream>
 #include <filesystem>
 
-#if WINDOWS
-	#include <stdlib.h>
-#else
-	#include <cstdlib>
-#endif
-
 typedef std::map<int, std::string> Lists;
 
 class HostsParser
@@ -31,14 +25,10 @@ class HostsParser
 		std::fstream _HostsFile;
 		#if WINDOWS
 			std::string _hosts_path = "\\.ssh\\hosts.ini";
-			size_t size;
-			char *path;
-			_dupenv_s(&path, &size, "USERPROFILE");
-			std::string _Path = path + _hosts_path;
 		#else
 			std::string _hosts_path = "/.ssh/hosts.ini";
-			std::string _Path = getenv("HOME") + _hosts_path;
 		#endif
+			std::string _Path;
 		bool _fileExist(std::string);
 		bool _readHosts();
 		void _updateHosts();
