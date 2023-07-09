@@ -62,14 +62,13 @@ bool check(sshmngr &s, const string &arg)
 {
 	try
 	{
-        stoi(arg);
+        s.host = stoi(arg);
     }
 	catch (...)
 	{
 		cout << "\033[31m[ERROR]\033[0m Invalid type value after argument" << endl;
         return false;
     }
-	s.host = stoi(arg);
 	return true;
 };
 
@@ -102,11 +101,12 @@ string command(string user, string host, string port)
 
 void printList(HostsParser &hosts)
 {
+	cout << "Yor hosts:\n";
 	map<int, string> listhosts = hosts.getListHosts();
 
 	for (auto iter2{listhosts.begin()}; iter2 != listhosts.end(); iter2++)
 	{
-		cout << "[" << iter2->first << "]" << "\t" << iter2->second << std::endl;
+		cout << "    [" << iter2->first << "]" << "\t" << iter2->second << std::endl;
 	}
 };
 
@@ -148,12 +148,12 @@ void printHelp(){
 	const char *Help=
 	"SSHManager Help v1.0\n"
 	"\n"
-	"h, help                              Get this help\n"
-	"l, list                              Get saved hosts templates\n"
-	"n, new    	                          Used to create new connections\n"
-	"c, connect + (argument (digital))    Used for connect to host\n"
-	"r, remove + (argument (digital))     Used to remove host preset\n"
-	"q, quit, exit                        Used to terminate the program\n";
+	"\033[33mh\033[0m, \033[33mhelp\033[0m                              Get this help\n"
+	"\033[33ml\033[0m, \033[33mlist\033[0m                              Get saved hosts templates\n"
+	"\033[33mn\033[0m, \033[33mnew\033[0m                               Used to create new connections\n"
+	"\033[33mc\033[0m, \033[33mconnect\033[0m + \033[35m(argument (digital))\033[0m    Used for connect to host\n"
+	"\033[33mr\033[0m, \033[33mremove\033[0m + \033[35m(argument (digital))\033[0m     Used to remove host preset\n"
+	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m                        Used to terminate the program\n";
 	cout << Help << endl;
 };
 
@@ -268,8 +268,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	string path = "./hosts";
-	HostsParser hosts = HostsParser(path);
+	HostsParser hosts = HostsParser();
 
 	if (args.help){
 		printFlagsHelp();
@@ -306,9 +305,9 @@ int main(int argc, char* argv[])
 	}
 
 	printLogo();
-	cout << "Welcome!\nYor hosts:\n";
+	cout << "Welcome!\n";
 	printList(hosts);
-	cout <<"\nType \033[33m[h]\033[0m or \033[33m[help]\033[0m for help\n";
+	cout <<"\nType \033[33m[h]\033[0m or \033[33m[help]\033[0m for help...\n";
 	while (args.main){
 		string answer;
 		answer = request();

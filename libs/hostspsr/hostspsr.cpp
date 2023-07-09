@@ -1,5 +1,10 @@
-#ifndef HOSTSPSR_CPP
-#define HOSTSPSR_CPP
+#ifdef WINDOWS
+	#define FLAG true
+	#define SL "\\"
+#else
+	#define FLAG false
+	#define SL "/"
+#endif
 
 #include "include/hostspsr.h"
 #include <fstream>
@@ -16,53 +21,16 @@ typedef std::map< int, std::string> Lists;
 
 HostsParser::HostsParser()
 {
-	if (_fileExist(_defaultPath))
+	if (_fileExist(_Path))
 	{
-		_HostsFile.open(_defaultPath);
+		_HostsFile.open(_Path);
 	}
 	else
 	{
-		std::ofstream file(_defaultPath);
-		file.close();
-		_HostsFile.open(_defaultPath);
-	}
-	_path = _defaultPath;
-	bool result = _readHosts();
-	if (!result) {
+		_HostsFile.open(_Path, std::ofstream::out | std::ofstream::trunc);
 		_HostsFile.close();
-		this->~HostsParser();
+		_HostsFile.open(_Path);
 	}
-	_HostsFile.close();
-}
-
-HostsParser::HostsParser(std::string path)
-{
-	if (_pathExist(path))
-	{
-		if (_fileExist(path + "/hosts.ini")) {
-			_HostsFile.open(path + "/hosts.ini");
-		}
-		else
-		{
-			std::ofstream file(path + "/hosts.ini");
-			file.close();
-			_HostsFile.open(path + "/hosts.ini");
-		}
-	}
-	else
-	{
-		if (_fileExist(_defaultPath))
-		{
-			_HostsFile.open(_defaultPath);
-		}
-		else
-		{
-			std::ofstream file(_defaultPath);
-			file.close();
-			_HostsFile.open(_defaultPath);
-		}
-	}
-	_path = path + "/hosts.ini";
 	bool result = _readHosts();
 	if (!result) {
 		_HostsFile.close();
@@ -129,13 +97,7 @@ bool HostsParser::removeHost(int indexHost)
 
 bool HostsParser::_fileExist(std::string path)
 {
-	return bool(std::ifstream(path));
-}
-
-bool HostsParser::_pathExist(std::string path)
-{
-	std::filesystem::path filepath = std::string(path);
-	return std::filesystem::is_directory(filepath.parent_path()) && bool(std::ifstream(path));
+	return bool(std::ifstream(FLAG ? std::filesystem::current_path().string() + SL + path : path));
 }
 
 std::map<int, std::string> HostsParser::getListHosts()
@@ -154,9 +116,9 @@ std::map<std::string, std::string> HostsParser::getHost(int index)
 
 void HostsParser::_saveHosts()
 {
-	_HostsFile.open(_path, std::ofstream::out | std::ofstream::trunc);
+	_HostsFile.open(_Path, std::ofstream::out | std::ofstream::trunc);
 	_HostsFile.close();
-	_HostsFile.open(_path, std::ofstream::out);
+	_HostsFile.open(_Path, std::ofstream::out);
 	for (int i=0; i < _listNames.size();i++)
     {
 		_HostsFile << "[" << _listNames[i] << "]" << std::endl;
@@ -221,12 +183,10 @@ bool HostsParser::_readHosts()
 		}
 		else
 		{
-			std::string errorMessage = "[ERROR]" + _defaultPath + ":" + std::to_string(lineNbr) + ": parsing error \n" + line;
+			std::string errorMessage = "[ERROR]" + _Path + ":" + std::to_string(lineNbr) + ": parsing error \n" + line;
 			return false;
 		}
 		lineNbr++;
 	}
 	return true;
 }
-
-#endif
