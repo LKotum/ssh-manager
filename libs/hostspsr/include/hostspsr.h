@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef WINDOWS
+#ifdef _WIN64
 	#define FLAG true
 #else
 	#define FLAG false

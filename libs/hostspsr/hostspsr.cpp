@@ -1,4 +1,4 @@
-#ifdef WINDOWS
+#ifdef _WIN64
 	#define FLAG true
 	#define SL "\\"
 #else

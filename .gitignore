@@ -3,3 +3,9 @@
 /build
 /hosts.ini
 /sshmgr
+/.vs
+/out
+/CMakeSettings.json
+/sshmgr.exe
+/sshmgr.ilk
+/sshmgr.pdb
