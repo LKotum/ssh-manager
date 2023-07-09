@@ -13,7 +13,7 @@
 #include <iostream>
 #include <filesystem>
 
-#if _WIN32
+#if WINDOWS
 	#include <stdlib.h>
 #else
 	#include <cstdlib>
