@@ -33,7 +33,7 @@ class HostsParser
 			std::string _hosts_path = "\\.ssh\\hosts.ini";
 			size_t size;
 			char *path;
-			_dupenv_s(&path, &size, "USERPROFILE")
+			_dupenv_s(&path, &size, "USERPROFILE");
 			std::string _Path = path + _hosts_path;
 		#else
 			std::string _hosts_path = "/.ssh/hosts.ini";
