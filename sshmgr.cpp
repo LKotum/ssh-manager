@@ -91,6 +91,11 @@ const unordered_map<string, OneArgHandle> OneArgs
 	{"--remove", [](sshmngr &s, const string &arg){ s.remove = check(s, arg); s.main = false; }},
 };
 
+// bool doctor()
+// {
+//  	return true;
+// }
+
 string command(string user, string host, string port)
 {
 	return "ssh " + user + "@" + host + " -p " + port;
