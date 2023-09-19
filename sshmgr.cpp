@@ -18,7 +18,7 @@ const char *logo =
 	"\033[33m| \\____) |\033[32m| \\____) |\033[34m _| |  | |_ \033[0m\n"
 	"\033[33m \\______.'\033[32m \\______.'\033[34m|____||____|\033[0m\n"
 	"\n"
-	"SSH manager (\033[31mv1.1.1\033[0m)\n"
+	"SSH manager (\033[31mv1.1.2\033[0m)\n"
 	"By \033[35mMaxLane\033[0m and \033[35mBadWolf\033[0m\n"
 	"\n"
 	"Feedback:\n"
@@ -349,9 +349,6 @@ int main(int argc, char* argv[])
 				break;
 			case 8:
 				return 0;
-				break;
-			default:
-				cout << "[WARN] Wrong argument! Type [help] to see all commands\n";
 				break;
 		}
 	}
