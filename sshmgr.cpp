@@ -17,8 +17,6 @@
 #include <map>
 #include "libs/hostspsr/include/hostspsr.h"
 
-using namespace std;
-
 const char *logo =
 	"\033[33m  ______  \033[32m  ______  \033[34m ____  ____ \033[0m\n"
 	"\033[33m.' ____ \\ \033[32m.' ____ \\ \033[34m|_   ||   _|\033[0m\n"
@@ -43,14 +41,13 @@ struct sshmngr
 	bool remove{false};
 	bool list{false};
 	bool main{true};
-	optional<int> host;
+	std::optional<int> host;
 };
 
+typedef std::function<void(sshmngr &)> NoArgHandle;
+typedef std::function<void(sshmngr &, const std::string &)> OneArgHandle;
 
-typedef function<void(sshmngr &)> NoArgHandle;
-typedef function<void(sshmngr &, const string &)> OneArgHandle;
-
-const unordered_map<string, NoArgHandle> NoArgs
+const std::unordered_map<std::string, NoArgHandle> NoArgs
 {
 	{"--help", [](sshmngr &s){ s.help = true; s.main = false; }},
 	{"-h", [](sshmngr &s){ s.help = true; s.main = false; }},
@@ -64,43 +61,43 @@ const unordered_map<string, NoArgHandle> NoArgs
 	{"--new-connect", [](sshmngr &s){ s.newconnect = true; s.connect = true; s.main = false;}},
 };
 
-bool check(sshmngr &s, const string &arg)
+bool check(sshmngr &s, const std::string &arg)
 {
 	try
 	{
-        s.host = stoi(arg);
+        s.host = std::stoi(arg);
     }
 	catch (...)
 	{
-		cout << "\033[31m[ERROR]\033[0m Invalid type value after argument" << endl;
+		std::cout << "\033[31m[ERROR]\033[0m Invalid type value after argument" << std::endl;
         return false;
     }
 	return true;
 };
 
-bool check(const string arg, int &value)
+bool check(const std::string arg, int &value)
 {
 	try
 	{
-        value = stoi(arg);
+        value = std::stoi(arg);
     }
 	catch (...)
 	{
-		cout << "\033[31m[ERROR]\033[0m Invalid type value after argument" << endl;
+		std::cout << "\033[31m[ERROR]\033[0m Invalid type value after argument" << std::endl;
 		return false;
     }
 	return true;
 };
 
-const unordered_map<string, OneArgHandle> OneArgs
+const std::unordered_map<std::string, OneArgHandle> OneArgs
 {
-	{"-c", [](sshmngr &s, const string &arg){ s.connect = check(s, arg); s.main = false; }},
-	{"--connect", [](sshmngr &s, const string &arg){ s.connect = check(s, arg); s.main = false; }},
-	{"-r", [](sshmngr &s, const string &arg){ s.remove = check(s, arg); s.main = false; }},
-	{"--remove", [](sshmngr &s, const string &arg){ s.remove = check(s, arg); s.main = false; }},
+	{"-c", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; }},
+	{"--connect", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; }},
+	{"-r", [](sshmngr &s, const std::string &arg){ s.remove = check(s, arg); s.main = false; }},
+	{"--remove", [](sshmngr &s, const std::string &arg){ s.remove = check(s, arg); s.main = false; }},
 };
 
-string sshClient()
+std::string sshClient()
 {
 	#if WINDOWS
 		return "ssh ";
@@ -110,25 +107,25 @@ string sshClient()
 	#endif
 };
 
-string command(string user, string host, string port)
+std::string command(std::string user, std::string host, std::string port)
 {
 	return sshClient() + user + "@" + host + " -p " + port;
 };
 
 void printList(HostsParser &hosts)
 {
-	cout << "\033[33mYour hosts:\033[0m\n";
-	map<int, string> listhosts = hosts.getListHosts();
+	std::cout << "\033[33mYour hosts:\033[0m\n";
+	std::map<int, std::string> listhosts = hosts.getListHosts();
 
 	for (auto iter2{listhosts.begin()}; iter2 != listhosts.end(); iter2++)
 	{
-		cout << "[" << iter2->first << "]" << " - \t" << "\033[32m" << iter2->second << "\033[0m" << std::endl;
+		std::cout << "[" << iter2->first << "]" << " - \t" << "\033[32m" << iter2->second << "\033[0m" << std::endl;
 	}
 };
 
 void printLogo()
 {
-	cout << logo << endl;
+	std::cout << logo << std::endl;
 };
 
 void printVer()
@@ -136,10 +133,10 @@ void printVer()
 	printLogo();
 };
 
-string request(){
-	string answer;
-	cout << "\033[34m->\033[0m ";
-	cin >> answer;
+std::string request(){
+	std::string answer;
+	std::cout << "\033[34m->\033[0m ";
+	std::cin >> answer;
 	return answer;
 };
 
@@ -153,7 +150,7 @@ void printFlagsHelp()
 	"\033[33m-nc\033[0m, \033[33m--new-connect\033[0m                         To save and connect quickly\n"
 	"\033[33m-c\033[0m,  \033[33m--connect\033[0m + \033[35m(argument (digital))\033[0m      Used for connect to host\n"
 	"\033[33m-r\033[0m,  \033[33m--remove\033[0m + \033[35m(argument (digital))\033[0m       Used to remove host preset\n";
-	cout << Help << endl;
+	std::cout << Help << std::endl;
 };
 
 void printHelp(){
@@ -164,26 +161,26 @@ void printHelp(){
 	"\033[33mc\033[0m, \033[33mconnect\033[0m       Used for connect to host\n"
 	"\033[33mr\033[0m, \033[33mremove\033[0m        Used to remove host preset\n"
 	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m    Used to terminate the program\n";
-	cout << Help << endl;
+	std::cout << Help << std::endl;
 };
 
 void addHost(HostsParser &hosts, bool connect = false)
 {
-	string host, port, user;
-	cout << "\033[32m[INFO]\033[0m Enter your host: ";
-	cin >> host;
-	cout << "\033[32m[INFO]\033[0m Enter your port: ";
-	cin >> port;
-	cout << "\033[32m[INFO]\033[0m Enter your username: ";
-	cin >> user;
+	std::string host, port, user;
+	std::cout << "\033[32m[INFO]\033[0m Enter your host: ";
+	std::cin >> host;
+	std::cout << "\033[32m[INFO]\033[0m Enter your port: ";
+	std::cin >> port;
+	std::cout << "\033[32m[INFO]\033[0m Enter your username: ";
+	std::cin >> user;
 	hosts.addHost(user, host, port);
 	if(connect){
 		system(command(user, host, port).c_str());
 		return;
 	}
-	cout << "\033[32m[INFO]\033[0m Try connect to " + host + " \033[33m(\033[4my\033[0m\033[33m/n)\033[0m: ";
-	string answer;
-	cin >> answer;
+	std::cout << "\033[32m[INFO]\033[0m Try connect to " + host + " \033[33m(\033[4my\033[0m\033[33m/n)\033[0m: ";
+	std::string answer;
+	std::cin >> answer;
 	if (answer == "y"){
 		system(command(user, host, port).c_str());
 
@@ -199,39 +196,39 @@ void addHost(HostsParser &hosts, bool connect = false)
 void removeHost(HostsParser &hosts, int index)
 {
 	if (!hosts.hostExicst(index)){
-		cout << "\033[33m[WARN]\033[0m Could not find this host!\n";
+		std::cout << "\033[33m[WARN]\033[0m Could not find this host!\n";
 		return;
 	}
-	cout << "\033[32m[INFO]\033[0m Are you sure? \033[33m(yes/no)\033[0m: ";
-	string answer;
-	cin >> answer;
+	std::cout << "\033[32m[INFO]\033[0m Are you sure? \033[33m(yes/no)\033[0m: ";
+	std::string answer;
+	std::cin >> answer;
 
 	while((answer != "yes") && (answer != "no")){
-		cout << "\033[31m[WARN]\033[0m Please, write \033[33m[yes]\033[0m or \033[33m[no]\033[0m: ";
-		cin >> answer;
+		std::cout << "\033[31m[WARN]\033[0m Please, write \033[33m[yes]\033[0m or \033[33m[no]\033[0m: ";
+		std::cin >> answer;
 	}
 
 	if(answer == "yes"){
 		bool result = hosts.removeHost(index);
 		if (result){
-			cout << "\033[32m[INFO]\033[0m Successfully!\n";
+			std::cout << "\033[32m[INFO]\033[0m Successfully!\n";
 		}
 		else{
-			cout << "\033[31m[WARN]\033[0m Failed!\n";
+			std::cout << "\033[31m[WARN]\033[0m Failed!\n";
 		}
 	}
 	else{
-		cout << "\033[32m[INFO]\033[0m Cancelled!\n";
+		std::cout << "\033[32m[INFO]\033[0m Cancelled!\n";
 		return;
 	}
 };
 
-void connectHost(map<string, string> &host)
+void connectHost(std::map<std::string, std::string> &host)
 {
 	system(command(host["user"], host["host"], host["port"]).c_str());
 };
 
-int commander(string comm){
+int commander(std::string comm){
 	if ((comm == "connect") || (comm == "c")){
 		return 2;
 	}
@@ -260,19 +257,19 @@ int main(int argc, char* argv[])
 	sshmngr args;
 	for (int i{1}; i < argc; i++)
 	{
-		string opt{argv[i]};
+		std::string opt{argv[i]};
 		if (auto j{NoArgs.find(opt)}; j != NoArgs.end()) j->second(args);
 		else if (auto k{OneArgs.find(opt)}; k != OneArgs.end())
 			if (++i < argc)
 				k->second(args, {argv[i]});
 			else
 			{
-				cerr << "\033[31m[ERROR]\033[0m Missing param after: " << opt << endl;
+				std::cerr << "\033[31m[ERROR]\033[0m Missing param after: " << opt << std::endl;
 				return 0;
 			}
 		else
 		{
-			cerr << "\033[31m[ERROR]\033[0m Unrecognized command-line option: " << opt << endl;
+			std::cerr << "\033[31m[ERROR]\033[0m Unrecognized command-line option: " << opt << std::endl;
 			return 0;
 		}
 	}
@@ -285,11 +282,11 @@ int main(int argc, char* argv[])
 
 	if((args.connect) && (!args.newconnect)){
 		if (hosts.hostExicst(args.host.value())){
-			map<string, string> host = hosts.getHost(args.host.value());
+			std::map<std::string, std::string> host = hosts.getHost(args.host.value());
 			connectHost(host);
 		}
 		else{
-			cout << "\033[31m[WARN]\033[0m Could not find this host!\n";
+			std::cout << "\033[31m[WARN]\033[0m Could not find this host!\n";
 		}
 	}
 
@@ -314,28 +311,28 @@ int main(int argc, char* argv[])
 	}
 
 	printLogo();
-	cout << "\033[32mWelcome!\033[0m\n";
+	std::cout << "\033[32mWelcome!\033[0m\n";
 	printList(hosts);
-	cout <<"\nType \033[33m[h]\033[0m or \033[33m[help]\033[0m for help...\n";
+	std::cout <<"\nType \033[33m[h]\033[0m or \033[33m[help]\033[0m for help...\n";
 	while (args.main){
-		string answer;
+		std::string answer;
 		answer = request();
 		switch (commander(answer)){
 			case 1:
-				cout << "\033[31m[WARN]\033[0m Wrong command! Type \033[33m[help]\033[0m to see all commands\n";
+				std::cout << "\033[31m[WARN]\033[0m Wrong command! Type \033[33m[help]\033[0m to see all commands\n";
 				break;
 			case 2:
 				{
-					cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
-					cin >> answer;
+					std::cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
+					std::cin >> answer;
 					int q;
 					if(check(answer, q)){
 						if (hosts.hostExicst(q)){
-							map<string, string> host = hosts.getHost(q);
+							std::map<std::string, std::string> host = hosts.getHost(q);
 							connectHost(host);
 						}
 						else{
-							cout << "\033[31m[WARN]\033[0m Could not find this host!\n";
+							std::cout << "\033[31m[WARN]\033[0m Could not find this host!\n";
 						}
 					}
 				}
@@ -345,8 +342,8 @@ int main(int argc, char* argv[])
 				break;
 			case 4:
 				{
-					cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
-					cin >> answer;
+					std::cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
+					std::cin >> answer;
 					int q;
 					if(check(answer, q))
 						removeHost(hosts, q);
@@ -359,7 +356,7 @@ int main(int argc, char* argv[])
 				printList(hosts);
 				break;
 			case 7:
-				cout << "" << endl;
+				std::cout << "" << std::endl;
 				break;
 			case 8:
 				return 0;
