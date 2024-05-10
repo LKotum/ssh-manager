@@ -18,7 +18,7 @@ const char *logo =
 	"\033[33m| \\____) |\033[32m| \\____) |\033[34m _| |  | |_ \033[0m\n"
 	"\033[33m \\______.'\033[32m \\______.'\033[34m|____||____|\033[0m\n"
 	"\n"
-	"SSH manager (\033[31mv1.1.2\033[0m)\n"
+	"SSH manager (\033[31mv1.1.3\033[0m)\n"
 	"By \033[35mMaxLane\033[0m and \033[35mBadWolf\033[0m\n"
 	"\n"
 	"Feedback:\n"
@@ -96,9 +96,37 @@ const unordered_map<string, OneArgHandle> OneArgs
 //  	return true;
 // }
 
+int getterm()
+{
+	string term = getenv("TERM");
+	if (term == "xterm-kitty") return 1;
+	return 0;
+}
+
+string sshClient()
+{
+	int value = 0;
+	
+	#if WINDOWS
+		value = 0
+	#else
+		value = getterm();
+	#endif
+
+	switch (value)
+	{
+	case 0:
+		return "ssh ";
+	case 1:
+		return "kitten ssh ";
+	default:
+		return "ssh ";
+	}
+}
+
 string command(string user, string host, string port)
 {
-	return "ssh " + user + "@" + host + " -p " + port;
+	return sshClient() + user + "@" + host + " -p " + port;
 };
 
 void printList(HostsParser &hosts)
