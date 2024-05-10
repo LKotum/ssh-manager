@@ -16,7 +16,6 @@
 #include <typeinfo>
 #include <map>
 #include "libs/hostspsr/include/hostspsr.h"
-#include "sshmgr.h"
 
 using namespace std;
 
@@ -106,8 +105,8 @@ string sshClient()
 	#if WINDOWS
 		return "ssh ";
 	#else
-		if (strcmp(getenv("TERM"), "xterm-kitty") == 0) return "kitten ssh ";
-		else return "ssh ";
+		const char* term = getenv("TERM");
+		return (term && term == std::string("xterm-kitty")) ? "kitten ssh " : "ssh ";
 	#endif
 };
 
