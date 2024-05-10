@@ -1,3 +1,12 @@
+#ifdef _WIN32
+	#define WINDOWS true
+#elif _WIN64
+	#define WINDOWS true
+#else
+	#define WINDOWS false
+#endif
+
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
@@ -7,6 +16,7 @@
 #include <typeinfo>
 #include <map>
 #include "libs/hostspsr/include/hostspsr.h"
+#include "sshmgr.h"
 
 using namespace std;
 
@@ -91,38 +101,15 @@ const unordered_map<string, OneArgHandle> OneArgs
 	{"--remove", [](sshmngr &s, const string &arg){ s.remove = check(s, arg); s.main = false; }},
 };
 
-// bool doctor()
-// {
-//  	return true;
-// }
-
-int getterm()
-{
-	string term = getenv("TERM");
-	if (term == "xterm-kitty") return 1;
-	return 0;
-}
-
 string sshClient()
 {
-	int value = 0;
-	
 	#if WINDOWS
-		value = 0
+		return "ssh ";
 	#else
-		value = getterm();
+		if (strcmp(getenv("TERM"), "xterm-kitty") == 0) return "kitten ssh ";
+		else return "ssh ";
 	#endif
-
-	switch (value)
-	{
-	case 0:
-		return "ssh ";
-	case 1:
-		return "kitten ssh ";
-	default:
-		return "ssh ";
-	}
-}
+};
 
 string command(string user, string host, string port)
 {

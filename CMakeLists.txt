@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8.2)
-project (sshmgr VERSION 1.0.0 LANGUAGES CXX)
+project (sshmgr VERSION 1.1.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
