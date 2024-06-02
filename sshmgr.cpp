@@ -25,7 +25,7 @@ const char *logo =
 	"\033[33m| \\____) |\033[32m| \\____) |\033[34m _| |  | |_ \033[0m\n"
 	"\033[33m \\______.'\033[32m \\______.'\033[34m|____||____|\033[0m\n"
 	"\n"
-	"SSH manager (\033[31mv1.1.3\033[0m)\n"
+	"SSH manager (\033[31mv1.2.0-BETA2\033[0m)\n"
 	"By \033[35mMaxLane\033[0m and \033[35mBadWolf\033[0m\n"
 	"\n"
 	"Feedback:\n"
@@ -40,6 +40,7 @@ struct sshmngr
 	bool connect{false};
 	bool remove{false};
 	bool list{false};
+	bool reconnect{false};
 	bool main{true};
 	std::optional<int> host;
 };
@@ -95,6 +96,8 @@ const std::unordered_map<std::string, OneArgHandle> OneArgs
 	{"--connect", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; }},
 	{"-r", [](sshmngr &s, const std::string &arg){ s.remove = check(s, arg); s.main = false; }},
 	{"--remove", [](sshmngr &s, const std::string &arg){ s.remove = check(s, arg); s.main = false; }},
+	{"-cl", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; s.reconnect = true;}},
+	{"--connect-looping", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; s.reconnect = true;}}
 };
 
 std::string sshClient()
@@ -149,7 +152,8 @@ void printFlagsHelp()
 	"\033[33m-n\033[0m,  \033[33m--new\033[0m                                 Used to save new connections\n"
 	"\033[33m-nc\033[0m, \033[33m--new-connect\033[0m                         To save and connect quickly\n"
 	"\033[33m-c\033[0m,  \033[33m--connect\033[0m + \033[35m(argument (digital))\033[0m      Used for connect to host\n"
-	"\033[33m-r\033[0m,  \033[33m--remove\033[0m + \033[35m(argument (digital))\033[0m       Used to remove host preset\n";
+	"\033[33m-r\033[0m,  \033[33m--remove\033[0m + \033[35m(argument (digital))\033[0m       Used to remove host preset\n"
+	"\033[33m-cl\033[0m, \033[33m--connect-looping\033[0m + \033[35m(argument (digital))\033[0m It is used in multiple cyclic connection to the host\n";
 	std::cout << Help << std::endl;
 };
 
@@ -160,7 +164,8 @@ void printHelp(){
 	"\033[33mn\033[0m, \033[33mnew\033[0m           Used to create new connections\n"
 	"\033[33mc\033[0m, \033[33mconnect\033[0m       Used for connect to host\n"
 	"\033[33mr\033[0m, \033[33mremove\033[0m        Used to remove host preset\n"
-	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m    Used to terminate the program\n";
+	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m    Used to terminate the program\n"
+	"\033[33mcl\033[0m, \033[33mconnect looping\033[0m It is used in multiple cyclic connection to the host\n";
 	std::cout << Help << std::endl;
 };
 
@@ -189,7 +194,7 @@ void addHost(HostsParser &hosts, bool connect = false)
 		return;
 	}
 	else {
-		command(user, host, port);
+		system(command(user, host, port).c_str());
 	}
 };
 
@@ -223,9 +228,22 @@ void removeHost(HostsParser &hosts, int index)
 	}
 };
 
-void connectHost(std::map<std::string, std::string> &host)
+void connectHost(std::map<std::string, std::string> &host, bool reconnect = false)
 {
 	system(command(host["user"], host["host"], host["port"]).c_str());
+	if (!reconnect) return;
+	int counter = 1;
+	do{
+		system(command(host["user"], host["host"], host["port"]).c_str());
+		counter++;
+		if (counter == 10){
+			std::cout << "\033[32m[INFO]\033[0m Continue reconnecting? \033[33m(\033[4my\033[0m\033[33m/n)\033[0m: ";
+			std::string answer;
+			std::cin >> answer;
+			if (answer == "n") reconnect = false;
+			counter = 0;
+		}
+	} while (reconnect);
 };
 
 int commander(std::string comm){
@@ -247,6 +265,9 @@ int commander(std::string comm){
 	// 7 is path
 	else if ((comm == "quit") || (comm == "q") || (comm == "exit") || (comm == "quit()")){
 		return 8;
+	}
+	else if ((comm == "connect looping") || (comm == "cl")){
+		return 9;
 	}
 
 	return 1;
@@ -283,7 +304,7 @@ int main(int argc, char* argv[])
 	if((args.connect) && (!args.newconnect)){
 		if (hosts.hostExicst(args.host.value())){
 			std::map<std::string, std::string> host = hosts.getHost(args.host.value());
-			connectHost(host);
+			connectHost(host, args.reconnect);
 		}
 		else{
 			std::cout << "\033[31m[WARN]\033[0m Could not find this host!\n";
@@ -361,6 +382,22 @@ int main(int argc, char* argv[])
 			case 8:
 				return 0;
 				break;
+			case 9:
+			{
+				std::cout << "\033[32m[INFO]\033[0m Enter the number of host: ";
+				std::cin >> answer;
+				int q;
+				if (check(answer, q)) {
+					if (hosts.hostExicst(q)) {
+						std::map<std::string, std::string> host = hosts.getHost(q);
+						connectHost(host, true);
+					}
+					else {
+						std::cout << "\033[31m[WARN]\033[0m Could not find this host!\n";
+					}
+				}
+				break;
+			}
 		}
 	}
 
