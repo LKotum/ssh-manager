@@ -17,6 +17,8 @@
 #include <map>
 #include "libs/hostspsr/include/hostspsr.h"
 
+const int REPEAT = 5;
+
 const char *logo =
 	"\033[33m  ______  \033[32m  ______  \033[34m ____  ____ \033[0m\n"
 	"\033[33m.' ____ \\ \033[32m.' ____ \\ \033[34m|_   ||   _|\033[0m\n"
@@ -58,8 +60,8 @@ const std::unordered_map<std::string, NoArgHandle> NoArgs
 	{"-l", [](sshmngr &s){ s.list = true; s.main = false; }},
 	{"--new", [](sshmngr &s){ s.newconnect = true; s.main = false; }},
 	{"-n", [](sshmngr &s){ s.newconnect = true; s.main = false; }},
-	{"-nc", [](sshmngr &s){ s.newconnect = true; s.connect = true; s.main = false;}},
 	{"--new-connect", [](sshmngr &s){ s.newconnect = true; s.connect = true; s.main = false;}},
+	{"-N", [](sshmngr &s){ s.newconnect = true; s.connect = true; s.main = false;}},
 };
 
 bool check(sshmngr &s, const std::string &arg)
@@ -96,8 +98,8 @@ const std::unordered_map<std::string, OneArgHandle> OneArgs
 	{"--connect", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; }},
 	{"-r", [](sshmngr &s, const std::string &arg){ s.remove = check(s, arg); s.main = false; }},
 	{"--remove", [](sshmngr &s, const std::string &arg){ s.remove = check(s, arg); s.main = false; }},
-	{"-cl", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; s.reconnect = true;}},
-	{"--connect-looping", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; s.reconnect = true;}}
+	{"-L", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; s.reconnect = true;}},
+	{"--loop", [](sshmngr &s, const std::string &arg){ s.connect = check(s, arg); s.main = false; s.reconnect = true;}}
 };
 
 std::string sshClient()
@@ -146,26 +148,26 @@ std::string request(){
 void printFlagsHelp()
 {
 	const char *Help=
-	"\033[33m-h\033[0m,  \033[33m--help\033[0m                                Get this help\n"
-	"\033[33m-v\033[0m,  \033[33m--version\033[0m                             Get information about program\n"
-	"\033[33m-l\033[0m,  \033[33m--list\033[0m                                Get list of hosts\n"
-	"\033[33m-n\033[0m,  \033[33m--new\033[0m                                 Used to save new connections\n"
-	"\033[33m-nc\033[0m, \033[33m--new-connect\033[0m                         To save and connect quickly\n"
-	"\033[33m-c\033[0m,  \033[33m--connect\033[0m + \033[35m(argument (digital))\033[0m      Used for connect to host\n"
-	"\033[33m-r\033[0m,  \033[33m--remove\033[0m + \033[35m(argument (digital))\033[0m       Used to remove host preset\n"
-	"\033[33m-cl\033[0m, \033[33m--connect-looping\033[0m + \033[35m(argument (digital))\033[0m It is used in multiple cyclic connection to the host\n";
+	"\033[33m-h\033[0m, \033[33m--help\033[0m                              Get this help\n"
+	"\033[33m-v\033[0m, \033[33m--version\033[0m                           Get information about program\n"
+	"\033[33m-l\033[0m, \033[33m--list\033[0m                              Get list of hosts\n"
+	"\033[33m-n\033[0m, \033[33m--new\033[0m                               Used to save new connections\n"
+	"\033[33m-N\033[0m, \033[33m--new-connect\033[0m                       To save and connect quickly\n"
+	"\033[33m-c\033[0m, \033[33m--connect\033[0m + \033[35m(argument (digital))\033[0m    Used for connect to host\n"
+	"\033[33m-r\033[0m, \033[33m--remove\033[0m + \033[35m(argument (digital))\033[0m     Used to remove host preset\n"
+	"\033[33m-L\033[0m, \033[33m--loop\033[0m + \033[35m(argument (digital))\033[0m       Used for cyclic connection to the host\n";
 	std::cout << Help << std::endl;
 };
 
 void printHelp(){
 	const char *Help=
-	"\033[33mh\033[0m, \033[33mhelp\033[0m          Get this help\n"
-	"\033[33ml\033[0m, \033[33mlist\033[0m          Get saved hosts templates\n"
-	"\033[33mn\033[0m, \033[33mnew\033[0m           Used to create new connections\n"
-	"\033[33mc\033[0m, \033[33mconnect\033[0m       Used for connect to host\n"
-	"\033[33mr\033[0m, \033[33mremove\033[0m        Used to remove host preset\n"
-	"\033[33mq\033[0m, \033[33mquit\033[0m, \033[33mexit\033[0m    Used to terminate the program\n"
-	"\033[33mcl\033[0m, \033[33mconnect looping\033[0m It is used in multiple cyclic connection to the host\n";
+	"\033[33mh\033[0m,  \033[33mhelp\033[0m          Get this help\n"
+	"\033[33ml\033[0m,  \033[33mlist\033[0m          Get saved hosts templates\n"
+	"\033[33mn\033[0m,  \033[33mnew\033[0m           Used to create new connections\n"
+	"\033[33mc\033[0m,  \033[33mconnect\033[0m       Used for connect to host\n"
+	"\033[33mr\033[0m,  \033[33mremove\033[0m        Used to remove host preset\n"
+	"\033[33mq\033[0m,  \033[33mquit\033[0m, \033[33mexit\033[0m    Used to terminate the program\n"
+	"\033[33mrc\033[0m, \033[33mreconnect\033[0m     Used for cyclic connection to the host\n";
 	std::cout << Help << std::endl;
 };
 
@@ -236,7 +238,7 @@ void connectHost(std::map<std::string, std::string> &host, bool reconnect = fals
 	do{
 		system(command(host["user"], host["host"], host["port"]).c_str());
 		counter++;
-		if (counter == 10){
+		if (counter == REPEAT){
 			std::cout << "\033[32m[INFO]\033[0m Continue reconnecting? \033[33m(\033[4my\033[0m\033[33m/n)\033[0m: ";
 			std::string answer;
 			std::cin >> answer;
@@ -266,7 +268,7 @@ int commander(std::string comm){
 	else if ((comm == "quit") || (comm == "q") || (comm == "exit") || (comm == "quit()")){
 		return 8;
 	}
-	else if ((comm == "connect looping") || (comm == "cl")){
+	else if ((comm == "rconnect") || (comm == "rc")){
 		return 9;
 	}
 
@@ -400,6 +402,5 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-
 	return 0;
 }
